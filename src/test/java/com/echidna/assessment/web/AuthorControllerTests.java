@@ -94,6 +94,12 @@ public class AuthorControllerTests {
     given(authorService.getAuthor(3)).willReturn(authors.get(2));
     given(authorService.getAuthor(4)).willReturn(authors.get(3));
     given(authorService.getAuthor(5)).willReturn(authors.get(4));
+    given(authorService.listAll()).willReturn(authors);
+
+    mvc.perform(get("/authors")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(5)));
 
     mvc.perform(get("/authors/6")
         .contentType(MediaType.APPLICATION_JSON))
