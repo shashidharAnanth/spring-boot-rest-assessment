@@ -1,5 +1,6 @@
 package com.echidna.assessment.domain;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -15,14 +16,16 @@ public class Author {
   private Integer id;
   private String name;
   private String description;
+  private LocalDate dateOfBirth;
 
   public Author() {
   }
 
-  public Author(Integer id, String name, String description) {
+  public Author(Integer id, String name, String description, LocalDate dateOfBirth) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.dateOfBirth = dateOfBirth;
   }
 
   public Integer getId() {
@@ -47,6 +50,14 @@ public class Author {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public LocalDate getDateOfBirth() {
+    return dateOfBirth;
+  }
+
+  public void setDateOfBirth(LocalDate dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 
   @Override

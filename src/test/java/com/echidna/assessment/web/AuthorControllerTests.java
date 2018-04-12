@@ -5,9 +5,13 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,11 +43,11 @@ public class AuthorControllerTests {
 
   @Test
   public void givenAuthors_whenGetAuthors_thenReturnJsonArray() throws Exception {
-    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days"),
-        new Author(2, "Rabindranath Tagore", "Author of Gitanjali"),
-        new Author(3, "Leo Tolstoy", "Russian writer"),
-        new Author(4, "Premchand", "Author in Hindi-Urdu"),
-        new Author(5, "Ruskin Bond", "Author in English"));
+    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days", LocalDate.of(1906, 10, 10)),
+        new Author(2, "Rabindranath Tagore", "Author of Gitanjali", LocalDate.of(1861, 5, 7)),
+        new Author(3, "Leo Tolstoy", "Russian writer", LocalDate.of(1828, 9, 9)),
+        new Author(4, "Premchand", "Author in Hindi-Urdu", LocalDate.of(1880, 7, 31)),
+        new Author(5, "Ruskin Bond", "Author in English", LocalDate.of(1934, 5, 19)));
 
     given(authorService.listAll()).willReturn(authors);
 
@@ -51,16 +55,19 @@ public class AuthorControllerTests {
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(5)))
-        .andExpect(jsonPath("$[0].name", is(authors.get(0).getName())));
+        .andExpect(jsonPath("$[0].name", is(authors.get(0).getName())))
+        .andExpect(jsonPath("$[0].description", is(authors.get(0).getDescription())))
+        .andExpect(jsonPath("$[0].dateOfBirth", is(authors.get(0).getDateOfBirth().format(
+            DateTimeFormatter.ISO_LOCAL_DATE))));
   }
 
   @Test
   public void givenAuthors_whenGetOneAuthor_thenReturnJsonObject() throws Exception {
-    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days"),
-        new Author(2, "Rabindranath Tagore", "Author of Gitanjali"),
-        new Author(3, "Leo Tolstoy", "Russian writer"),
-        new Author(4, "Premchand", "Author in Hindi-Urdu"),
-        new Author(5, "Ruskin Bond", "Author in English"));
+    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days", LocalDate.of(1906, 10, 10)),
+        new Author(2, "Rabindranath Tagore", "Author of Gitanjali", LocalDate.of(1861, 5, 7)),
+        new Author(3, "Leo Tolstoy", "Russian writer", LocalDate.of(1828, 9, 9)),
+        new Author(4, "Premchand", "Author in Hindi-Urdu", LocalDate.of(1880, 7, 31)),
+        new Author(5, "Ruskin Bond", "Author in English", LocalDate.of(1934, 5, 19)));
 
     given(authorService.getAuthor(1)).willReturn(authors.get(0));
     given(authorService.getAuthor(2)).willReturn(authors.get(1));
@@ -72,22 +79,28 @@ public class AuthorControllerTests {
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", is(notNullValue())))
-        .andExpect(jsonPath("$.name", is(authors.get(0).getName())));
+        .andExpect(jsonPath("$.name", is(authors.get(0).getName())))
+        .andExpect(jsonPath("$.description", is(authors.get(0).getDescription())))
+        .andExpect(jsonPath("$.dateOfBirth", is(authors.get(0).getDateOfBirth().format(
+            DateTimeFormatter.ISO_LOCAL_DATE))));
 
     mvc.perform(get("/authors/5")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", is(notNullValue())))
-        .andExpect(jsonPath("$.name", is(authors.get(4).getName())));
+        .andExpect(jsonPath("$.name", is(authors.get(4).getName())))
+        .andExpect(jsonPath("$.description", is(authors.get(4).getDescription())))
+        .andExpect(jsonPath("$.dateOfBirth", is(authors.get(4).getDateOfBirth().format(
+            DateTimeFormatter.ISO_LOCAL_DATE))));
   }
 
   @Test
   public void givenAuthors_whenGetMissingAuthor_thenReturnNotFound() throws Exception {
-    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days"),
-        new Author(2, "Rabindranath Tagore", "Author of Gitanjali"),
-        new Author(3, "Leo Tolstoy", "Russian writer"),
-        new Author(4, "Premchand", "Author in Hindi-Urdu"),
-        new Author(5, "Ruskin Bond", "Author in English"));
+    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days", LocalDate.of(1906, 10, 10)),
+        new Author(2, "Rabindranath Tagore", "Author of Gitanjali", LocalDate.of(1861, 5, 7)),
+        new Author(3, "Leo Tolstoy", "Russian writer", LocalDate.of(1828, 9, 9)),
+        new Author(4, "Premchand", "Author in Hindi-Urdu", LocalDate.of(1880, 7, 31)),
+        new Author(5, "Ruskin Bond", "Author in English", LocalDate.of(1934, 5, 19)));
 
     given(authorService.getAuthor(1)).willReturn(authors.get(0));
     given(authorService.getAuthor(2)).willReturn(authors.get(1));
@@ -120,11 +133,11 @@ public class AuthorControllerTests {
 
   @Test
   public void givenAuthors_whenSaveAnAuthor_thenReturnJsonObject() throws Exception {
-    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days"),
-        new Author(2, "Rabindranath Tagore", "Author of Gitanjali"),
-        new Author(3, "Leo Tolstoy", "Russian writer"),
-        new Author(4, "Premchand", "Author in Hindi-Urdu"),
-        new Author(5, "Ruskin Bond", "Author in English"));
+    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days", LocalDate.of(1906, 10, 10)),
+        new Author(2, "Rabindranath Tagore", "Author of Gitanjali", LocalDate.of(1861, 5, 7)),
+        new Author(3, "Leo Tolstoy", "Russian writer", LocalDate.of(1828, 9, 9)),
+        new Author(4, "Premchand", "Author in Hindi-Urdu", LocalDate.of(1880, 7, 31)),
+        new Author(5, "Ruskin Bond", "Author in English", LocalDate.of(1934, 5, 19)));
 
     given(authorService.save(authors.get(0))).willReturn(authors.get(0));
     given(authorService.save(authors.get(1))).willReturn(authors.get(1));
@@ -145,7 +158,10 @@ public class AuthorControllerTests {
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", containsString("/authors/1")))
         .andExpect(jsonPath("$", is(notNullValue())))
-        .andExpect(jsonPath("$.name", is(authors.get(0).getName())));
+        .andExpect(jsonPath("$.name", is(authors.get(0).getName())))
+        .andExpect(jsonPath("$.description", is(authors.get(0).getDescription())))
+        .andExpect(jsonPath("$.dateOfBirth", is(authors.get(0).getDateOfBirth().format(
+            DateTimeFormatter.ISO_LOCAL_DATE))));
 
     mvc.perform(post("/authors")
         .accept(MediaType.APPLICATION_JSON)
@@ -154,6 +170,29 @@ public class AuthorControllerTests {
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", containsString("/authors/5")))
         .andExpect(jsonPath("$", is(notNullValue())))
-        .andExpect(jsonPath("$.name", is(authors.get(4).getName())));
+        .andExpect(jsonPath("$.name", is(authors.get(4).getName())))
+        .andExpect(jsonPath("$.description", is(authors.get(4).getDescription())))
+        .andExpect(jsonPath("$.dateOfBirth", is(authors.get(4).getDateOfBirth().format(
+            DateTimeFormatter.ISO_LOCAL_DATE))));
+  }
+
+  @Test
+  public void givenAuthors_whenSaveInvalidAuthor_thenReturnError() throws Exception {
+    int len = 2000;
+    String str = "a";
+    String longName = IntStream.range(0, len).mapToObj(i -> str).collect(Collectors.joining(""));
+    Author inputAuthor = new Author(1, longName, "Test Author", LocalDate.of(2018,1,1));
+    String author_0_json = mapper.writeValueAsString(inputAuthor);
+
+    given(authorService.save(inputAuthor)).willReturn(inputAuthor);
+
+    mvc.perform(post("/authors")
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(author_0_json))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$", is(notNullValue())))
+        .andExpect(jsonPath("$.message", is("Validation failed")))
+        .andExpect(jsonPath("$.details", is("Name should have min of 2 characters and max of 255")));
   }
 }
