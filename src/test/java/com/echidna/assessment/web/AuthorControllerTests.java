@@ -198,12 +198,12 @@ public class AuthorControllerTests {
 
   @Test
   public void givenAuthors_whenSaveAnAuthor_withMissingName_thenReturn4xxClientError() throws Exception {
-    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days"),
-        new Author(2, "Rabindranath Tagore", "Author of Gitanjali"),
-        new Author(3, "Leo Tolstoy", "Russian writer"),
-        new Author(4, "Premchand", "Author in Hindi-Urdu"),
-        new Author(5, "Ruskin Bond", "Author in English"),
-        new Author(6, "", "Author in French"));
+    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days", LocalDate.of(1906, 10, 10)),
+        new Author(2, "Rabindranath Tagore", "Author of Gitanjali", LocalDate.of(1861, 5, 7)),
+        new Author(3, "Leo Tolstoy", "Russian writer", LocalDate.of(1828, 9, 9)),
+        new Author(4, "Premchand", "Author in Hindi-Urdu", LocalDate.of(1880, 7, 31)),
+        new Author(5, "Ruskin Bond", "Author in English", LocalDate.of(1934, 5, 19)),
+        new Author(6, "", "Author in French", LocalDate.of(1985, 11, 11)));
 
     given(authorService.save(authors.get(0))).willReturn(authors.get(0));
     given(authorService.save(authors.get(1))).willReturn(authors.get(1));
@@ -218,31 +218,6 @@ public class AuthorControllerTests {
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
         .content(author_5_json))
-        .andExpect(status().is4xxClientError());
-  }
-
-  @Test
-  public void givenAuthors_whenSaveAnAuthor_withMissingDescription_thenReturn4xxClientError() throws Exception {
-    List<Author> authors = Arrays.asList(new Author(1, "R.K. Narayan", "Author of Malgudi Days"),
-        new Author(2, "Rabindranath Tagore", "Author of Gitanjali"),
-        new Author(3, "Leo Tolstoy", "Russian writer"),
-        new Author(4, "Premchand", "Author in Hindi-Urdu"),
-        new Author(5, "Ruskin Bond", "Author in English"),
-        new Author(6, "TM White", ""));
-
-    given(authorService.save(authors.get(0))).willReturn(authors.get(0));
-    given(authorService.save(authors.get(1))).willReturn(authors.get(1));
-    given(authorService.save(authors.get(2))).willReturn(authors.get(2));
-    given(authorService.save(authors.get(3))).willReturn(authors.get(3));
-    given(authorService.save(authors.get(4))).willReturn(authors.get(4));
-    given(authorService.save(authors.get(5))).willReturn(authors.get(5));
-
-    String author_5_json = mapper.writeValueAsString(authors.get(5));
-
-    mvc.perform(post("/authors")
-        .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(author_5_json))
-        .andExpect(status().is4xxClientError());
+        .andExpect(status().isBadRequest());
   }
 }
